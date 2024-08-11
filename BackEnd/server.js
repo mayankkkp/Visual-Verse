@@ -10,28 +10,24 @@ app.use(bodyParser.json());
 
 const PORT = 5000;
 
-// MongoDB Connection
-mongoose.connect('mongodb://localhost:27017/LoginSignUp', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+const url = "mongodb+srv://mANAVV:visualverse0601@visualverse.14ch8.mongodb.net/?retryWrites=true&w=majority&appName=Visualverse";
+
+
+mongoose.connect(url)
     .then(() => {
         console.log('MongoDB connected');
-        // Initialize GridFSBucket after successful connection
+    
         const conn = mongoose.connection;
         app.locals.bucket = new GridFSBucket(conn.db, {
             bucketName: 'images'
         });
 
-        // Start server after initializing GridFS
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
         });
     })
     .catch(err => console.log('MongoDB connection error:', err));
 
-// Include the auth routes
-app.use(authRoutes);
 
-// Serve uploaded files
+app.use(authRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
