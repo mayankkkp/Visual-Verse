@@ -51,13 +51,11 @@ app.use(cors({
   credentials: true
 }));
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 
-// MongoDB connection string
-const url = "mongodb+srv://mANAVV:visualverse0601@visualverse.14ch8.mongodb.net/visualverse?retryWrites=true&w=majority";
+const url = "mongodb+srv://mANAVV:visualverse0601@visualverse.14ch8.mongodb.net/?retryWrites=true&w=majority&appName=Visualverse";
 
-// Connect to MongoDB
-mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(url)
     .then(() => {
         console.log('MongoDB connected');
     
@@ -66,13 +64,11 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
             bucketName: 'images'
         });
 
-        // Start server after successful DB connection
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
         });
     })
     .catch(err => console.log('MongoDB connection error:', err));
 
-// Routes
-app.use('/api', authRoutes); // Prefix your auth routes with /api
+app.use(authRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

@@ -96,11 +96,16 @@ const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const nodemailer = require('nodemailer');
-const User = require('../models/User'); // Assuming you have a User model
+const User = require('../models/User'); // Ensure this path is correct
 const router = express.Router();
 
 // Environment variables for secret keys, email, and Google OAuth
-const { JWT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, EMAIL, EMAIL_PASSWORD } = process.env;
+const { JWT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, EMAIL, EMAIL_PASSWORD, CLIENT_URL } = process.env;
+
+// Ensure environment variables are defined
+if (!JWT_SECRET || !GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !EMAIL || !EMAIL_PASSWORD || !CLIENT_URL) {
+    throw new Error('Missing environment variables');
+}
 
 // Configure passport for Google OAuth
 passport.use(new GoogleStrategy({
@@ -189,7 +194,7 @@ router.post('/forgot-password', async (req, res) => {
             from: EMAIL,
             to: user.email,
             subject: 'Password Reset',
-            text: `Click the following link to reset your password: ${process.env.CLIENT_URL}/reset-password/${resetToken}`
+            text: `Click the following link to reset your password: ${CLIENT_URL}/reset-password/${resetToken}`
         };
 
         await transporter.sendMail(mailOptions);
@@ -210,7 +215,7 @@ router.get('/auth/google/callback', passport.authenticate('google', {
     session: false
 }), (req, res) => {
     const token = createToken(req.user);
-    res.redirect(`${process.env.CLIENT_URL}/login?token=${token}`);
+    res.redirect(`${CLIENT_URL}/login?token=${token}`);
 });
 
 // Middleware to authenticate JWT token
@@ -229,6 +234,7 @@ const authenticateToken = (req, res, next) => {
 router.get('/user', authenticateToken, async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
         res.status(200).json(user);
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error' });
