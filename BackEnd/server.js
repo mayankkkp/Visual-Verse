@@ -3,10 +3,15 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const path = require('path');
+const cors = require('cors');
 const { GridFSBucket } = require('mongodb');
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors({
+  origin: 'http://localhost:3000', 
+  credentials: true
+}));
 
 const PORT = 5000;
 
