@@ -4,12 +4,30 @@ const User = require('../models/user');
 const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
+const passport = require('passport');
+require('./passport');
 
 // Use memory storage for multer
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-router.post('/forgot-password', async (req, res) => {
+// Google Sign-In Routes
+router.get('/auth/google', passport.authenticate('google', {
+    scope: ['profile', 'email']
+}));
+
+router.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
+    // Successful authentication, redirect home.
+    res.redirect('/');
+});
+
+// Optionally, add a route to handle logging out
+router.get('/logout', (req, res) => {
+    req.logout();
+    res.redirect('/');
+});
+
+router.post('/forget-password', async (req, res) => {
     const { email, username, newPassword } = req.body;
     try {
         let user = await User.findOne({ email, username });

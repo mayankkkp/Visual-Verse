@@ -75,12 +75,16 @@ function Login() {
 
   const handleGoogleLogin = async () => {
     try {
-      const response = await axios.get("https://visual-verse-1.onrender.com/api/auth/google");
-      window.location.href = response.data.url;
+        // Request the URL to redirect to Google's OAuth service
+        const response = await axios.get("https://visual-verse-1.onrender.com/api/auth/google");
+        
+        // Redirect the user to the URL provided by the backend
+        window.location.href = response.data.url;
     } catch (error) {
-      setAuthError(error.message);
+        // Handle errors (e.g., show a message to the user)
+        setAuthError("Failed to initiate Google login. Please try again.");
     }
-  };
+};
 
   const handleForgotPassword = async () => {
     try {
