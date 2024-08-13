@@ -16,7 +16,7 @@ function App() {
           <>
             <Nav />
             <Routes>
-              <Route exact path="/" element={<HomePage />} />
+              <Route exact path="/pages/HomePage" element={<HomePage />} />
               <Route exact path="/album/:albumName" element={<AlbumPage />} />
             </Routes>
           </>

@@ -9,6 +9,23 @@ const crypto = require('crypto');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+router.post('/forgot-password', async (req, res) => {
+    const { email, username, newPassword } = req.body;
+    try {
+        let user = await User.findOne({ email, username });
+        if (!user) {
+            return res.status(400).json({ msg: 'User with this email and username does not exist' });
+        }
+        user.password = newPassword;
+        await user.save();
+
+        res.status(200).json({ msg: 'Password updated successfully' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 router.post('/signup', async (req, res) => {
     const { username, email, password } = req.body;
     try {

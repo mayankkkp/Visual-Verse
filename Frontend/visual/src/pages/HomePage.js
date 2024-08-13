@@ -4,7 +4,7 @@ import Album from "../components/Album";
 import Photo from "../components/Photo";
 import CreateAlbumModal from "../components/CreateAlbumModal";
 
-import { Typography } from "@mui/material";
+import { Typography, IconButton, Grid } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -23,7 +23,7 @@ function HomePage() {
     dispatch(setCurrentAlbum({ albumId: "ROOT", albumName: "ROOT" }));
   }, [dispatch]);
 
-  // To get Photos
+  // Fetch Root Photos
   useEffect(() => {
     const unsubscribe = getRootPhotos(uid, (snapshot) => {
       setPhotos(
@@ -33,10 +33,10 @@ function HomePage() {
         }))
       );
     });
-    return unsubscribe; // eslint-disable-next-line
-  }, []);
+    return unsubscribe;
+  }, [uid]);
 
-  // To get Albums
+  // Fetch Albums
   useEffect(() => {
     const unsubscribe = getAlbums((snapshot) => {
       setAlbums(
@@ -47,8 +47,8 @@ function HomePage() {
       );
     }, uid);
 
-    return unsubscribe; // eslint-disable-next-line
-  }, []);
+    return unsubscribe;
+  }, [uid]);
 
   const handleCreateAlbumModal = () => {
     setIsCreateAlbumOpen(true);
@@ -56,34 +56,42 @@ function HomePage() {
 
   return (
     <div className="homepage">
-      <Typography variant="h5">Albums</Typography>
-      <div className="homepage__photos">
-        {/* Create Album */}
-        <div
-          onClick={handleCreateAlbumModal}
-          title="Create New Album"
-          className="homepage__photoAlbum"
-          style={{ backgroundColor: "#D0D0D0" }}
-        >
-          <AddIcon fontSize="large" />
-        </div>
+      <Typography variant="h4" className="homepage__title">
+        Albums
+      </Typography>
 
-        {
-          /* Album (Individual) */
-          albums.map(({ id, data }) => (
-            <Album key={id} id={id} data={data} />
-          ))
-        }
-      </div>
+      <Grid container spacing={2} className="homepage__albums">
+        <Grid item xs={12} sm={6} md={4} lg={3}>
+          <div
+            className="homepage__createAlbum"
+            onClick={handleCreateAlbumModal}
+          >
+            <IconButton aria-label="Create New Album" size="large">
+              <AddIcon fontSize="large" />
+            </IconButton>
+            <Typography>Create New Album</Typography>
+          </div>
+        </Grid>
 
-      {/* Root Directory Photos */}
-      <div className="homepage__photos">
-        {photos.map(({ id, data }) => (
-          <Photo key={id} id={id} data={data} />
+        {albums.map(({ id, data }) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={id}>
+            <Album id={id} data={data} />
+          </Grid>
         ))}
-      </div>
+      </Grid>
 
-      {/* Modal */}
+      <Typography variant="h4" className="homepage__title">
+        Photos
+      </Typography>
+
+      <Grid container spacing={2} className="homepage__photos">
+        {photos.map(({ id, data }) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={id}>
+            <Photo id={id} data={data} />
+          </Grid>
+        ))}
+      </Grid>
+
       <CreateAlbumModal
         isCreateAlbumOpen={isCreateAlbumOpen}
         setIsCreateAlbumOpen={setIsCreateAlbumOpen}

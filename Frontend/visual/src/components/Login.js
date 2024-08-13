@@ -1,30 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { Button, CircularProgress, TextField, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
-import { setUser } from "../actions";
-import "../css/login.css";
+import "../css/login.css"; // Import the CSS file for styling
 
 function Login() {
-  const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
   const [isSignup, setIsSignup] = useState(false);
-  const [isForgotPassword, setIsForgotPassword] = useState(false); // Track if user is in "Forgot Password" mode
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
+    username: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
 
+  const navigate = useNavigate();  // Get the navigate function
+
   useEffect(() => {
-    // Check if user is already logged in
     axios.get("https://visual-verse-1.onrender.com/user", { withCredentials: true })
       .then(response => {
         const user = response.data;
         if (user) {
-          dispatch(setUser(user));
+          navigate("/home");  // Redirect to HomePage if user is already logged in
         }
         setIsLoading(false);
       })
@@ -32,7 +30,7 @@ function Login() {
         console.error("Error checking auth status:", error);
         setIsLoading(false);
       });
-  }, [dispatch]);
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -50,14 +48,15 @@ function Login() {
 
     try {
       await axios.post("https://visual-verse-1.onrender.com/signup", {
+        username: formData.username,
         email: formData.email,
         password: formData.password
       });
       alert("Signup successful! Please log in.");
       setIsSignup(false);
-      setFormData({ email: '', password: '', confirmPassword: '' });
+      setFormData({ username: '', email: '', password: '', confirmPassword: '' });
     } catch (error) {
-      setAuthError(error.message);
+      setAuthError("Signup Failed");
     }
   };
 
@@ -68,9 +67,7 @@ function Login() {
         password: formData.password
       });
       alert("Login successful!");
-      // Fetch user data after successful login
-      const response = await axios.get("https://visual-verse-1.onrender.com/user", { withCredentials: true });
-      dispatch(setUser(response.data));
+      navigate("./pages/HomePage");  // Redirect to HomePage after successful login
     } catch (error) {
       setAuthError("Login failed. Please check your credentials.");
     }
@@ -78,8 +75,8 @@ function Login() {
 
   const handleGoogleLogin = async () => {
     try {
-      const response = await axios.get("https://visual-verse-1.onrender.com/api/auth/google"); // Backend endpoint for Google login
-      window.location.href = response.data.url; // Redirect to Google's OAuth URL
+      const response = await axios.get("https://visual-verse-1.onrender.com/api/auth/google");
+      window.location.href = response.data.url;
     } catch (error) {
       setAuthError(error.message);
     }
@@ -99,7 +96,7 @@ function Login() {
   return (
     <div className="login-container">
       {isLoading ? (
-        <CircularProgress />
+        <p>Loading...</p>
       ) : (
         <div className="login-box">
           <img
@@ -108,90 +105,72 @@ function Login() {
           />
           {isForgotPassword ? (
             <>
-              <Typography variant="h6">Forgot Password</Typography>
-              <TextField
+              <h3>Forgot Password</h3>
+              <input
                 name="email"
-                label="Email"
+                type="email"
+                placeholder="Email"
                 value={formData.email}
                 onChange={handleInputChange}
-                fullWidth
-                margin="normal"
               />
-              <Button onClick={handleForgotPassword} variant="contained" color="primary">
-                Send Reset Link
-              </Button>
-              <Button onClick={() => setIsForgotPassword(false)} variant="outlined" color="secondary">
-                Back to Login
-              </Button>
+              <button onClick={handleForgotPassword}>Send Reset Link</button>
+              <button onClick={() => setIsForgotPassword(false)}>Back to Login</button>
             </>
           ) : isSignup ? (
             <>
-              <Typography variant="h6">Sign Up</Typography>
-              <TextField
+              <h3>Sign Up</h3>
+              <input
+                name="username"
+                type="text"
+                placeholder="Username"
+                value={formData.username}
+                onChange={handleInputChange}
+              />
+              <input
                 name="email"
-                label="Email"
+                type="email"
+                placeholder="Email"
                 value={formData.email}
                 onChange={handleInputChange}
-                fullWidth
-                margin="normal"
               />
-              <TextField
+              <input
                 name="password"
                 type="password"
-                label="Password"
+                placeholder="Password"
                 value={formData.password}
                 onChange={handleInputChange}
-                fullWidth
-                margin="normal"
               />
-              <TextField
+              <input
                 name="confirmPassword"
                 type="password"
-                label="Confirm Password"
+                placeholder="Confirm Password"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
-                fullWidth
-                margin="normal"
               />
-              <Button onClick={handleSignup} variant="contained" color="primary">
-                Sign Up
-              </Button>
-              <Button onClick={() => setIsSignup(false)} variant="outlined" color="secondary">
-                Back to Login
-              </Button>
+              <button onClick={handleSignup}>Sign Up</button>
+              <button onClick={() => setIsSignup(false)}>Back to Login</button>
             </>
           ) : (
             <>
-              <Typography variant="h6">Login</Typography>
-              <TextField
+              <h3>VisualVerse</h3>
+              <input
                 name="email"
-                label="Email"
+                type="email"
+                placeholder="Email"
                 value={formData.email}
                 onChange={handleInputChange}
-                fullWidth
-                margin="normal"
               />
-              <TextField
+              <input
                 name="password"
                 type="password"
-                label="Password"
+                placeholder="Password"
                 value={formData.password}
                 onChange={handleInputChange}
-                fullWidth
-                margin="normal"
               />
-              <Button onClick={handleLogin} variant="contained" color="primary">
-                Login
-              </Button>
-              <Button onClick={handleGoogleLogin} variant="contained" color="primary">
-                Sign In With Google
-              </Button>
-              <Button onClick={() => setIsSignup(true)} variant="outlined" color="secondary">
-                Sign Up
-              </Button>
-              <Button onClick={() => setIsForgotPassword(true)} variant="text" color="primary" className="forgot-password-link">
-                Forgot Password?
-              </Button>
+              <button onClick={handleLogin}>Login</button>
+              <button onClick={handleGoogleLogin}>Sign In With Google</button>
+              <button onClick={() => setIsSignup(true)}>Sign Up</button>
+              <button variant="text" onClick={() => setIsForgotPassword(true)}>Forgot Password?</button>
             </>
           )}
           {authError && <p className="auth-error">{authError}</p>}
